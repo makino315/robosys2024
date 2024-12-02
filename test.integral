@@ -1,0 +1,50 @@
+import sympy as sp
+import sys
+
+def integrate_function(func_str, a, b):
+    # 数式を処理するために sympy を使います
+    try:
+        # x を定義
+        x = sp.symbols('x')
+        # 数式を文字列から変換
+        func = sp.sympify(func_str)
+        # 積分の計算
+        integral = sp.integrate(func, (x, a, b))
+        return integral
+    except sp.SympifyError:
+        return f"エラー: 無効な関数 '{func_str}'"
+    except Exception as e:
+        return f"エラー: {str(e)}"
+
+def main():
+    # 標準入力を読み込む
+    input_data = sys.stdin.read().strip()
+    
+    # 入力が不足している場合
+    if not input_data:
+        print("エラー: 入力が不足しています。")
+        sys.exit(1)
+    
+    # 入力を分割（関数と区間）
+    try:
+        func_str, a_str, b_str = input_data.split("\n")
+        a = float(a_str)
+        b = float(b_str)
+    except ValueError:
+        print("エラー: 入力形式が正しくありません。")
+        sys.exit(1)
+
+    # 積分区間が無効（a > b）の場合
+    if a > b:
+        print("エラー: 積分区間が無効です。")
+        sys.exit(1)
+
+    # 関数の積分計算
+    result = integrate_function(func_str, a, b)
+    
+    # 結果の出力
+    print(f"f(x) = {func_str} の区間 [{a}, {b}] における定積分の結果: {result}")
+
+if __name__ == "__main__":
+    main()
+
