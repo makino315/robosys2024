@@ -1,50 +1,37 @@
-import sympy as sp
-import sys
+#!/bin/bash -xv
+# SPDX-FileCopyrightText:
+# SPDX-License-Identifier: BSD-3-Clause
 
-def integrate_function(func_str, a, b):
-    # 数式を処理するために sympy を使います
-    try:
-        # x を定義
-        x = sp.symbols('x')
-        # 数式を文字列から変換
-        func = sp.sympify(func_str)
-        # 積分の計算
-        integral = sp.integrate(func, (x, a, b))
-        return integral
-    except sp.SympifyError:
-        return f"エラー: 無効な関数 '{func_str}'"
-    except Exception as e:
-        return f"エラー: {str(e)}"
+ng () {
+       echo ${1}行目が違うよ
+       res=1
+}
 
-def main():
-    # 標準入力を読み込む
-    input_data = sys.stdin.read().strip()
-    
-    # 入力が不足している場合
-    if not input_data:
-        print("エラー: 入力が不足しています。")
-        sys.exit(1)
-    
-    # 入力を分割（関数と区間）
-    try:
-        func_str, a_str, b_str = input_data.split("\n")
-        a = float(a_str)
-        b = float(b_str)
-    except ValueError:
-        print("エラー: 入力形式が正しくありません。")
-        sys.exit(1)
+res=0
 
-    # 積分区間が無効（a > b）の場合
-    if a > b:
-        print("エラー: 積分区間が無効です。")
-        sys.exit(1)
+# テストケース1: 正常な関数と積分区間
+out=$(echo -e "x**2\n0,1" | ./integral.py)
+[ "${out}" = "f(x) = x**2 の区間 [0.0, 1.0] における定積分の結果: 1/3" ] || ng "$LINENO"
 
-    # 関数の積分計算
-    result = integrate_function(func_str, a, b)
-    
-    # 結果の出力
-    print(f"f(x) = {func_str} の区間 [{a}, {b}] における定積分の結果: {result}")
+# テストケース2: 負の積分区間
+out=$(echo -e "x**2\n-1,0" | ./integral.py)
+[ "${out}" = "f(x) = x**2 の区間 [-1.0, 0.0] における定積分の結果: 1/3" ] || ng "$LINENO"
 
-if __name__ == "__main__":
-    main()
+# テストケース3: 無効な関数入力
+out=$(echo -e "x**\n0,1" | ./integral.py)
+[ "$?" = 1 ] || ng "$LINENO"
+[ "${out}" = "エラー: Sympify of expression 'could not parse 'x**' failed, because of exception being raised: SyntaxError: invalid syntax (<string>, line 1)" ] || ng "$LINENO"
+
+# テストケース4: 無効な積分区間
+out=$(echo -e "x**2\n0,a" | ./integral.py)
+[ "$?" = 1 ] || ng "$LINENO"
+[ "${out}" = "エラー: could not convert string to float: 'a'" ] || ng "$LINENO"
+
+# テストケース5: 空の入力
+out=$(echo -e "\n" | ./integral.py)
+[ "$?" = 1 ] || ng "$LINENO"
+[ "${out}" = "エラー: list index out of range" ] || ng "$LINENO"
+
+[ "${res}" = 0 ] && echo OK
+exit $res
 
