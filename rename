@@ -1,5 +1,0 @@
-import os
-
-# ファイル名を変更する
-os.rename('READ.md', 'README.md')
-

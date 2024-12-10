@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import sys
-from datetime import datetime
 
 # ディズニーの設立年
 disney_founded_year = 1923
